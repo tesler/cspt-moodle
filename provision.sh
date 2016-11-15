@@ -135,6 +135,8 @@ if [ ! -f /var/www/moodle/config.php ]; then
         --adminpass=${MOODLE_ADMIN_PASSWORD} \
         --fullname="Moodle CSPT" \
         --shortname="moodle-cspt"
+
+    cp /var/www/config/config.php /var/www/moodle/config.php
 fi
 
 apt-get -y upgrade

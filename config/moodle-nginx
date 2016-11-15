@@ -8,6 +8,11 @@ server {
         try_files $uri $uri/index.php;
     }
 
+    location /dataroot/ {
+        internal;
+        alias /var/www/moodledata/;
+    }
+
     location ~ [^/]\.php(/|$) {
         fastcgi_split_path_info  ^(.+\.php)(/.+)$;
         fastcgi_index            index.php;
