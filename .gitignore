@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # This file specifies intentionally untracked files that all Moodle git
 # repositories should ignore. It is recommended not to modify this file in your
 # local clone. Instead, use .git/info/exclude and add new records there as
@@ -38,3 +39,9 @@ atlassian-ide-plugin.xml
 /node_modules/
 
 .vagrant
+=======
+.vagrant/
+moodledata/
+.idea/
+ubuntu-xenial-16.04-cloudimg-console.log
+>>>>>>> 70fc112dc7769b2d619d3fbfa46e807aa6af3030
