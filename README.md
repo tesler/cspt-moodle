@@ -2,6 +2,15 @@
 Курсовой проект по предмету Технология программирования кибернетических систем (Cybernetic Systems Programming Technology)
 
 # Необходимое ПО
+<<<<<<< HEAD
+* VirtualBox
+* vagrant
+
+# Установка
+* Сделать `fork` репозитория в свой аккаунт;
+* Сделать `clone` к себе на машину;
+* `vagrant up` в директории с проектом.
+=======
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 * [vagrant](https://www.vagrantup.com/downloads.html)
 
@@ -28,3 +37,4 @@ Moodle 3.1 (db: moodle/moodle, admin: admin/test)
 
 # Конфигурация
 * 
+>>>>>>> 70fc112dc7769b2d619d3fbfa46e807aa6af3030
