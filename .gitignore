@@ -2,3 +2,4 @@
 moodledata/
 .idea/
 ubuntu-xenial-16.04-cloudimg-console.log
+vendor/
