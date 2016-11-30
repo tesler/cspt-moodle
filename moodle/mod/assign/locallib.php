@@ -91,7 +91,7 @@ class assign {
     /** @var stdClass the assignment record that contains the global settings for this assign instance */
     private $instance;
 
-    /** @var stdClass the grade_item record for this assign instance's primary grade item. */
+    /** @var grade_item the grade_item record for this assign instance's primary grade item. */
     private $gradeitem;
 
     /** @var context the context of the course module for this assign instance
@@ -1245,7 +1245,7 @@ class assign {
     /**
      * Get the primary grade item for this assign instance.
      *
-     * @return stdClass The grade_item record
+     * @return grade_item The grade_item record
      */
     public function get_grade_item() {
         if ($this->gradeitem) {
@@ -1371,7 +1371,6 @@ class assign {
 
         static $scalegrades = array();
 
-        $decimals = $this->get_grade_item()->get_decimals();
         $o = '';
 
         if ($this->get_instance()->grade >= 0) {
@@ -1380,7 +1379,7 @@ class assign {
                 if ($grade < 0) {
                     $displaygrade = '';
                 } else {
-                    $displaygrade = format_float($grade, $decimals);
+                    $displaygrade = format_float($grade, $this->get_grade_item()->get_decimals());
                 }
                 $o .= '<label class="accesshide" for="quickgrade_' . $userid . '">' .
                        get_string('usergrade', 'assign') .
@@ -1392,7 +1391,7 @@ class assign {
                               size="6"
                               maxlength="10"
                               class="quickgrade"/>';
-                $o .= '&nbsp;/&nbsp;' . format_float($this->get_instance()->grade, $decimals);
+                $o .= '&nbsp;/&nbsp;' . format_float($this->get_instance()->grade, $this->get_grade_item()->get_decimals());
                 return $o;
             } else {
                 if ($grade == -1 || $grade === null) {
@@ -1402,7 +1401,7 @@ class assign {
                     $o .= grade_format_gradevalue($grade, $item);
                     if ($item->get_displaytype() == GRADE_DISPLAY_TYPE_REAL) {
                         // If displaying the raw grade, also display the total value.
-                        $o .= '&nbsp;/&nbsp;' . format_float($this->get_instance()->grade, $decimals);
+                        $o .= '&nbsp;/&nbsp;' . format_float($this->get_instance()->grade, $item->get_decimals());
                     }
                 }
                 return $o;
@@ -1654,6 +1653,10 @@ class assign {
                         $count += 1;
                     }
                 }
+            } else if ($activitygroup != 0 && empty($groups)) {
+                // Set count to 1 if $groups returns empty.
+                // It means the group is not part of $this->get_instance()->teamsubmissiongroupingid.
+                $count = 1;
             }
         } else {
             // It is faster to loop around participants if no grouping was specified.
@@ -1825,6 +1828,12 @@ class assign {
                                                 array_keys($participants),
                                                 $this->get_instance()->teamsubmissiongroupingid,
                                                 'DISTINCT g.id, g.name');
+                if (empty($groups)) {
+                    // If $groups is empty it means it is not part of $this->get_instance()->teamsubmissiongroupingid.
+                    // All submissions from students that do not belong to any of teamsubmissiongroupingid groups
+                    // count towards groupid = 0. Setting to true as only '0' key matters.
+                    $groups = [true];
+                }
                 list($groupssql, $groupsparams) = $DB->get_in_or_equal(array_keys($groups), SQL_PARAMS_NAMED);
                 $groupsstr = 's.groupid ' . $groupssql . ' AND';
                 $params = $params + $groupsparams;
@@ -4582,7 +4591,7 @@ class assign {
 
         if ($this->can_view_submission($user->id)) {
 
-            if (has_capability('mod/assign:submit', $this->get_context(), $user)) {
+            if (has_capability('mod/assign:submit', $this->get_context(), $user, false)) {
                 $submissionstatus = $this->get_assign_submission_status_renderable($user, $showlinks);
                 $o .= $this->get_renderer()->render($submissionstatus);
             }
@@ -5949,7 +5958,7 @@ class assign {
             if ($current->grade !== null) {
                 $current->grade = floatval($current->grade);
             }
-            $gradechanged = $gradecolpresent && $current->grade !== $modified->grade;
+            $gradechanged = $gradecolpresent && grade_floats_different($current->grade, $modified->grade);
             $markingallocationchanged = $this->get_instance()->markingworkflow &&
                                         $this->get_instance()->markingallocation &&
                                             ($modified->allocatedmarker !== false) &&
@@ -6714,14 +6723,13 @@ class assign {
         if (!empty($CFG->enableoutcomes)) {
             foreach ($gradinginfo->outcomes as $index => $outcome) {
                 $options = make_grades_menu(-$outcome->scaleid);
+                $options[0] = get_string('nooutcome', 'grades');
                 if ($outcome->grades[$userid]->locked) {
-                    $options[0] = get_string('nooutcome', 'grades');
                     $mform->addElement('static',
                                        'outcome_' . $index . '[' . $userid . ']',
                                        $outcome->name . ':',
                                        $options[$outcome->grades[$userid]->grade]);
                 } else {
-                    $options[''] = get_string('nooutcome', 'grades');
                     $attributes = array('id' => 'menuoutcome_' . $index );
                     $mform->addElement('select',
                                        'outcome_' . $index . '[' . $userid . ']',
